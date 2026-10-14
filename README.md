@@ -2,7 +2,7 @@
 
 **Secure Email Gateway** | Team ZeroTrace | SPIT Mumbai | CNS Course Project
 
-[![CI](https://github.com/YOUR_USERNAME/phishshield/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/phishshield/actions)
+[![CI](https://github.com/SwanandDixit/phishshield/actions/workflows/ci.yml/badge.svg)](https://github.com/SwanandDixit/phishshield/actions)
 
 PhishShield is a fully functional, production-grade secure email gateway that examines every incoming email through multiple cryptographic and ML-based security layers before delivery.
 
