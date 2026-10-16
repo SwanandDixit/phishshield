@@ -178,6 +178,6 @@ if __name__ == "__main__":
         "backend.app.main:app",
         host=app_settings.api_host,
         port=app_settings.api_port,
-        reload=app_settings.debug,
+        reload=True,
         **ssl_kwargs,
     )

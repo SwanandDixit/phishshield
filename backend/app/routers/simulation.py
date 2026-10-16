@@ -41,6 +41,9 @@ async def run_simulation(
             detail=f"Invalid scenario. Choose from: {', '.join(sorted(valid_scenarios))}",
         )
 
+    if not body.scenario:
+        body.scenario = scenario
+
     try:
         result = await run_scenario(
             scenario=scenario,

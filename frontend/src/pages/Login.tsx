@@ -8,7 +8,7 @@ import { setToken } from '../lib/auth'
 
 export default function Login() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('admin@phishshield.local')
+  const [email, setEmail] = useState('admin@phishshield.com')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
 

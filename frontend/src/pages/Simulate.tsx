@@ -67,7 +67,7 @@ function ResultsPanel({ result }: { result: any }) {
               <tr key={i} className="border-b dark:border-gray-700/50">
                 <td className="py-1">{i+1}</td>
                 <td className="py-1"><span className={`px-1.5 py-0.5 rounded text-xs ${r.verdict==='MALICIOUS'?'bg-red-100 text-red-700':r.verdict==='SUSPICIOUS'?'bg-amber-100 text-amber-700':'bg-green-100 text-green-700'}`}>{r.verdict||'—'}</span></td>
-                <td className="py-1 font-mono">{r.risk_score?.toFixed(1)??r.replay_delivery?.email_id?'—':'—'}</td>
+                <td className="py-1 font-mono">{r.risk_score != null ? Number(r.risk_score).toFixed(1) : '—'}</td>
                 <td className="py-1">{r.detected||r.replay_detected?<span className="text-green-600 font-medium">✓ Yes</span>:<span className="text-red-600">✗ No</span>}</td>
                 <td className="py-1 text-gray-500">{(r.catching_layers||[]).join(', ').slice(0,60)}</td>
                 <td className="py-1 text-gray-500">{r.latency_ms?.toFixed(0)}ms</td>

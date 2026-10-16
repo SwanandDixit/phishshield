@@ -174,6 +174,10 @@ def compute_risk_score(inp: RiskInput, thresholds: dict | None = None) -> RiskOu
         override = True
         override_reason = "Known-malicious attachment hash detected"
 
+    # Correlation rule: Failed SPF/DMARC combined with sender/header spoofing is high-risk
+    if (inp.spf_result in ("fail", "softfail") or inp.dmarc_result == "fail") and inp.header_risk_score >= 30.0:
+        total = max(total, 65.0)
+
     total = round(min(total, 100.0), 2)
 
     # ── Verdict ───────────────────────────────────────────────────────────────

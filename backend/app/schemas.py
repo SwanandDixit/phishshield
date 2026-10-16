@@ -165,7 +165,7 @@ class DashboardStats(BaseModel):
 
 
 class SimulationRequest(BaseModel):
-    scenario: str = Field(pattern="^(phishing|spoofing|tampering|replay|mitm|batch)$")
+    scenario: Optional[str] = Field(default=None, pattern="^(phishing|spoofing|tampering|replay|mitm|batch)$")
     iterations: int = Field(default=1, ge=1, le=50)
     include_benign: bool = True
 
@@ -173,11 +173,12 @@ class SimulationRequest(BaseModel):
 class SimulationResult(BaseModel):
     scenario: str
     iterations: int
-    results: list[dict]
+    results: Any
     detection_rate: float
-    false_positive_rate: Optional[float]
+    false_positive_rate: Optional[float] = None
     avg_latency_ms: float
     summary: dict
+
 
 
 # ─── Log ─────────────────────────────────────────────────────────────────────

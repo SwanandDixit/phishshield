@@ -153,12 +153,22 @@ async def scenario_phishing(db: Session, iteration: int = 0) -> dict:
     subject = PHISHING_SUBJECTS[iteration % len(PHISHING_SUBJECTS)]
     body = PHISHING_BODIES[iteration % len(PHISHING_BODIES)].format(url=url)
 
+    phishing_senders = [
+        ("PayPal Security <security@paypal.com>", "security@paypa1.com"),
+        ("Google Accounts <accounts@google.com>", "alerts@g00gle.com"),
+        ("Apple Security <id@apple.com>", "support@app1e.com"),
+        ("Microsoft 365 <admin@microsoft.com>", "security@micros0ft.com"),
+        ("Amazon Security <alerts@amazon.com>", "service@amaz0n.com"),
+        ("Bank of America <online@bankofamerica.com>", "verify@bank0famerica.com"),
+    ]
+    from_name, from_addr = phishing_senders[iteration % len(phishing_senders)]
+
     raw = _build_mime(
-        from_addr=f"security@paypa1-secure.tk",
+        from_addr=from_addr,
         to_addr="victim@company.com",
         subject=subject,
         body=body,
-        from_name="PayPal Security Team",
+        from_name=from_name,
     )
 
     t0 = time.perf_counter()
@@ -394,6 +404,9 @@ async def scenario_replay(db: Session, iteration: int = 0) -> dict:
     return {
         "scenario": "replay",
         "iteration": iteration,
+        "email_id": record2.id,
+        "verdict": record2.verdict.value if record2.verdict else None,
+        "risk_score": record2.risk_score,
         "first_delivery": {
             "email_id": record1.id,
             "verdict": record1.verdict.value if record1.verdict else None,
