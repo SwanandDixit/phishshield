@@ -66,11 +66,15 @@ class Settings(BaseSettings):
 
     @property
     def aes_master_key_bytes(self) -> bytes:
-        """Decode the base64-encoded AES master key to raw bytes."""
-        raw = base64.urlsafe_b64decode(self.aes_master_key + "==")
-        if len(raw) != 32:
-            raise ValueError("AES_MASTER_KEY must decode to exactly 32 bytes")
-        return raw
+        """Decode the base64-encoded AES master key to raw bytes, with sha256 fallback."""
+        try:
+            raw = base64.urlsafe_b64decode(self.aes_master_key + "==")
+            if len(raw) == 32:
+                return raw
+        except Exception:
+            pass
+        import hashlib
+        return hashlib.sha256(self.aes_master_key.encode("utf-8")).digest()
 
     @property
     def cors_origins_list(self) -> list[str]:

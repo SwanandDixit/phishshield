@@ -84,7 +84,11 @@ def _seed_admin() -> None:
             db.commit()
             logger.info("Seeded admin user: %s", app_settings.admin_email)
         else:
-            logger.info("Admin user already exists: %s", app_settings.admin_email)
+            if app_settings.admin_password:
+                existing.hashed_password = hash_password(app_settings.admin_password)
+                existing.is_active = True
+                db.commit()
+            logger.info("Admin user updated/verified: %s", app_settings.admin_email)
     finally:
         db.close()
 

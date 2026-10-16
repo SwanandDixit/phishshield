@@ -32,8 +32,9 @@ _IPV6_RE = re.compile(
     re.IGNORECASE,
 )
 
-#: Detects CRLF sequences or bare CR/LF inside a single header value.
-_CRLF_RE = re.compile(r"(\r\n|\r|\n)")
+#: Detects CRLF sequences or bare CR/LF inside a single header value
+#: (excluding legal RFC 2822/5322 header folding where CRLF is followed by space/tab).
+_CRLF_RE = re.compile(r"(\r\n|\r|\n)(?![ \t])")
 
 #: Suspicious X-header names that may indicate spamming tools or exploitation.
 _SUSPICIOUS_X_HEADERS: frozenset[str] = frozenset(
@@ -249,12 +250,13 @@ def detect_header_injection(
     """
     findings: dict[str, str] = {}
     for name, value in all_headers.items():
-        match = _CRLF_RE.search(value)
+        val_clean = value.rstrip("\r\n")
+        match = _CRLF_RE.search(val_clean)
         if match:
             # Capture a short snippet around the injection point.
             start = max(0, match.start() - 20)
-            end = min(len(value), match.end() + 40)
-            snippet = repr(value[start:end])
+            end = min(len(val_clean), match.end() + 40)
+            snippet = repr(val_clean[start:end])
             findings[name] = snippet
     return findings
 
