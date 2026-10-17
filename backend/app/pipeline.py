@@ -16,8 +16,7 @@ from __future__ import annotations
 
 import base64
 import time
-from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy.orm import Session
 
@@ -90,8 +89,8 @@ def _build_educational_explanation(
     spf: Any,
     dkim: Any,
     dmarc: Any,
-    sig_valid: Optional[bool],
-    hmac_valid: Optional[bool],
+    sig_valid: bool | None,
+    hmac_valid: bool | None,
     replay_detected: bool,
     url_result: Any,
     attach_result: list,
@@ -282,8 +281,8 @@ async def process_email(
     nonce_header = _headers_lower.get("x-phishshield-nonce", "")
     timestamp_header = _headers_lower.get("x-phishshield-timestamp", "")
 
-    sig_valid: Optional[bool] = None
-    hmac_valid_result: Optional[bool] = None
+    sig_valid: bool | None = None
+    hmac_valid_result: bool | None = None
     replay_detected = False
     signature_claimed = bool(sig_header)
     hmac_claimed = bool(hmac_header)
@@ -323,6 +322,7 @@ async def process_email(
     if hmac_header:
         try:
             import base64 as _b64
+
             from backend.app.models import RegisteredKey
             parts = hmac_header.split()
             hmac_b64 = parts[0]

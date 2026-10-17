@@ -10,7 +10,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import ssl
-from email import message_from_bytes
 
 from aiosmtpd.controller import Controller
 from aiosmtpd.smtp import SMTP as SMTPServer

@@ -4,13 +4,11 @@ Covers: AES-256-GCM, Ed25519, RSA-PSS, HMAC-SHA256, SHA-256, replay protection.
 """
 from __future__ import annotations
 
-import base64
 import os
-import time
 
 import pytest
 
-from backend.crypto.aes import decrypt, decrypt_email, encrypt, encrypt_email, derive_key
+from backend.crypto.aes import decrypt, decrypt_email, derive_key, encrypt, encrypt_email
 from backend.crypto.hashing import sha256_hash, sha256_hash_bytes, verify_hash
 from backend.crypto.hmac_util import hmac_sign, hmac_verify, pbkdf2_derive
 from backend.crypto.signatures import (
@@ -221,7 +219,6 @@ class TestHashing:
 
     def test_no_md5(self):
         """Ensure we never use MD5 for security purposes."""
-        import hashlib
         # SHA-256 output is 32 bytes; MD5 is 16 bytes
         result = sha256_hash_bytes(b"test")
         assert len(result) == 32  # Not MD5's 16 bytes

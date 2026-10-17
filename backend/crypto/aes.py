@@ -13,7 +13,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
-
 # ─── Key derivation ───────────────────────────────────────────────────────────
 
 def derive_key(master_key: bytes, info: bytes, salt: bytes | None = None) -> bytes:

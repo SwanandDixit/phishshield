@@ -7,7 +7,6 @@ from __future__ import annotations
 import csv
 import io
 import json
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy import desc, or_
@@ -23,10 +22,10 @@ router = APIRouter(prefix="/logs", tags=["logs"])
 
 @router.get("/", response_model=list[LogEntry])
 async def list_logs(
-    severity: Optional[str] = Query(None),
-    event_type: Optional[str] = Query(None),
-    stage: Optional[str] = Query(None),
-    search: Optional[str] = Query(None),
+    severity: str | None = Query(None),
+    event_type: str | None = Query(None),
+    stage: str | None = Query(None),
+    search: str | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),

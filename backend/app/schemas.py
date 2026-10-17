@@ -4,10 +4,9 @@ PhishShield – Pydantic schemas for request/response validation.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, EmailStr, Field
-
 
 # ─── Auth ────────────────────────────────────────────────────────────────────
 
@@ -39,8 +38,8 @@ class UserOut(BaseModel):
 class EmailAnalysisRequest(BaseModel):
     """Raw RFC 2822 email bytes (base64-encoded) for analysis."""
     raw_email_b64: str
-    source_ip: Optional[str] = None
-    tls_info: Optional[dict[str, Any]] = None
+    source_ip: str | None = None
+    tls_info: dict[str, Any] | None = None
 
 
 class URLAnalysisRequest(BaseModel):
@@ -56,17 +55,17 @@ class RiskBreakdown(BaseModel):
     crypto_score: float
     total: float
     hard_override: bool = False
-    override_reason: Optional[str] = None
+    override_reason: str | None = None
 
 
 class EmailSummary(BaseModel):
     id: int
-    message_id: Optional[str]
+    message_id: str | None
     received_at: datetime
-    sender_address: Optional[str]
-    subject: Optional[str]
-    verdict: Optional[str]
-    risk_score: Optional[float]
+    sender_address: str | None
+    subject: str | None
+    verdict: str | None
+    risk_score: float | None
     tls_established: bool
     is_simulation: bool
 
@@ -75,43 +74,43 @@ class EmailSummary(BaseModel):
 
 class EmailDetail(BaseModel):
     id: int
-    message_id: Optional[str]
+    message_id: str | None
     received_at: datetime
-    sender_address: Optional[str]
-    sender_display_name: Optional[str]
-    reply_to: Optional[str]
-    subject: Optional[str]
-    recipients: Optional[list[str]]
-    tls_protocol: Optional[str]
-    tls_cipher: Optional[str]
+    sender_address: str | None
+    sender_display_name: str | None
+    reply_to: str | None
+    subject: str | None
+    recipients: list[str] | None
+    tls_protocol: str | None
+    tls_cipher: str | None
     tls_established: bool
-    spf_result: Optional[str]
-    dkim_result: Optional[str]
-    dmarc_result: Optional[str]
-    auth_details: Optional[dict]
-    sha256_hash: Optional[str]
-    signature_valid: Optional[bool]
-    hmac_valid: Optional[bool]
+    spf_result: str | None
+    dkim_result: str | None
+    dmarc_result: str | None
+    auth_details: dict | None
+    sha256_hash: str | None
+    signature_valid: bool | None
+    hmac_valid: bool | None
     replay_detected: bool
-    crypto_details: Optional[dict]
-    url_findings: Optional[dict]
-    attachment_findings: Optional[dict]
-    header_findings: Optional[dict]
-    spoofing_findings: Optional[dict]
-    ml_phishing_probability: Optional[float]
-    ml_verdict: Optional[str]
-    ml_top_features: Optional[list]
-    risk_score: Optional[float]
-    risk_breakdown: Optional[dict]
-    verdict: Optional[str]
+    crypto_details: dict | None
+    url_findings: dict | None
+    attachment_findings: dict | None
+    header_findings: dict | None
+    spoofing_findings: dict | None
+    ml_phishing_probability: float | None
+    ml_verdict: str | None
+    ml_top_features: list | None
+    risk_score: float | None
+    risk_breakdown: dict | None
+    verdict: str | None
     delivered: bool
     quarantined: bool
-    warning_message: Optional[str]
-    sanitized_html: Optional[str]
-    pipeline_timing: Optional[dict]
-    explanation: Optional[dict]
+    warning_message: str | None
+    sanitized_html: str | None
+    pipeline_timing: dict | None
+    explanation: dict | None
     is_simulation: bool
-    simulation_scenario: Optional[str]
+    simulation_scenario: str | None
 
     model_config = {"from_attributes": True}
 
@@ -133,7 +132,7 @@ class KeyOut(BaseModel):
     public_key_pem: str
     is_active: bool
     created_at: datetime
-    revoked_at: Optional[datetime]
+    revoked_at: datetime | None
 
     model_config = {"from_attributes": True}
 
@@ -141,8 +140,8 @@ class KeyOut(BaseModel):
 class KeyGenerateResponse(BaseModel):
     """Returned once on key creation – private key shown only this once."""
     key: KeyOut
-    private_key_pem: Optional[str] = None  # None for HMAC keys
-    hmac_secret_b64: Optional[str] = None  # for HMAC keys
+    private_key_pem: str | None = None  # None for HMAC keys
+    hmac_secret_b64: str | None = None  # for HMAC keys
 
 
 # ─── Dashboard ───────────────────────────────────────────────────────────────
@@ -165,7 +164,7 @@ class DashboardStats(BaseModel):
 
 
 class SimulationRequest(BaseModel):
-    scenario: Optional[str] = Field(default=None, pattern="^(phishing|spoofing|tampering|replay|mitm|batch)$")
+    scenario: str | None = Field(default=None, pattern="^(phishing|spoofing|tampering|replay|mitm|batch)$")
     iterations: int = Field(default=1, ge=1, le=50)
     include_benign: bool = True
 
@@ -175,7 +174,7 @@ class SimulationResult(BaseModel):
     iterations: int
     results: Any
     detection_rate: float
-    false_positive_rate: Optional[float] = None
+    false_positive_rate: float | None = None
     avg_latency_ms: float
     summary: dict
 
@@ -186,14 +185,14 @@ class SimulationResult(BaseModel):
 
 class LogEntry(BaseModel):
     id: int
-    email_id: Optional[int]
+    email_id: int | None
     timestamp: datetime
     event_type: str
     severity: str
-    stage: Optional[str]
+    stage: str | None
     message: str
-    details: Optional[dict]
-    source_ip: Optional[str]
+    details: dict | None
+    source_ip: str | None
 
     model_config = {"from_attributes": True}
 
@@ -219,5 +218,5 @@ class ModelMetrics(BaseModel):
     training_samples: int = 2441
     test_samples: int = 611
     top_features: list[dict] = Field(default_factory=list)
-    trained_at: Optional[str] = None
+    trained_at: str | None = None
     dataset_source: str = "SpamAssassin Public Corpus"

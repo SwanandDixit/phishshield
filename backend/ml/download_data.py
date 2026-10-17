@@ -9,11 +9,9 @@ Output: backend/ml/data/emails.csv  (columns: text, label, source)
 from __future__ import annotations
 
 import io
-import os
 import random
 import string
 import tarfile
-import textwrap
 from pathlib import Path
 
 import pandas as pd

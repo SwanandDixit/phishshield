@@ -13,15 +13,11 @@ from __future__ import annotations
 import email
 import email.policy
 import email.utils
-import hashlib
-import quopri
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from email.message import Message
-from typing import Any
 
 from backend.crypto.hashing import sha256_hash
-
 
 # ---------------------------------------------------------------------------
 # Dataclasses

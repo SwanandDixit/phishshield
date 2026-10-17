@@ -18,19 +18,17 @@ import base64
 import random
 import string
 import time
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy.orm import Session
 
 from backend.app.pipeline import process_email
 from backend.crypto.hashing import sha256_hash
-from backend.crypto.replay import generate_nonce, current_timestamp
-from backend.crypto.signatures import generate_ed25519_keypair, ed25519_sign
-
+from backend.crypto.replay import current_timestamp, generate_nonce
+from backend.crypto.signatures import ed25519_sign, generate_ed25519_keypair
 
 # ─── Phishing email templates ─────────────────────────────────────────────────
 
@@ -120,7 +118,7 @@ def _build_mime(
     msg["From"] = f'"{from_name}" <{from_addr}>' if from_name else from_addr
     msg["To"] = to_addr
     msg["Subject"] = subject
-    msg["Date"] = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000")
+    msg["Date"] = datetime.now(UTC).strftime("%a, %d %b %Y %H:%M:%S +0000")
     msg["Message-ID"] = f"<{''.join(random.choices(string.ascii_lowercase, k=16))}@phishshield.test>"
     if reply_to:
         msg["Reply-To"] = reply_to
@@ -388,7 +386,6 @@ async def scenario_replay(db: Session, iteration: int = 0) -> dict:
         tls_info={"established": True, "protocol": "TLSv1.3", "cipher_name": "TLS_AES_256_GCM_SHA384"},
         is_simulation=True, simulation_scenario="replay",
     )
-    latency_first = round((time.perf_counter() - t0) * 1000, 2)
 
     # Second delivery: REPLAY — exact same signed_raw with same nonce → detected
     t0 = time.perf_counter()

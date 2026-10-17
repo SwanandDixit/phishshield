@@ -3,12 +3,9 @@ Tests for the replay attack protection (nonce cache).
 """
 from __future__ import annotations
 
-import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
-import pytest
-
-from backend.crypto.replay import NonceCache, generate_nonce, current_timestamp
+from backend.crypto.replay import NonceCache, current_timestamp, generate_nonce
 
 
 class TestNonceCache:
@@ -37,7 +34,7 @@ class TestNonceCache:
         cache = NonceCache(db, window_seconds=60)
         nonce = generate_nonce()
         # Timestamp 10 minutes old (outside 60-second window)
-        old_ts = (datetime.now(timezone.utc) - timedelta(minutes=10)).isoformat()
+        old_ts = (datetime.now(UTC) - timedelta(minutes=10)).isoformat()
         valid, reason = cache.check_and_consume(nonce, old_ts)
         assert not valid
         assert "timestamp" in reason.lower() or "old" in reason.lower()
@@ -45,7 +42,7 @@ class TestNonceCache:
     def test_future_timestamp_rejected(self, db):
         cache = NonceCache(db, window_seconds=60)
         nonce = generate_nonce()
-        future_ts = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
+        future_ts = (datetime.now(UTC) + timedelta(minutes=10)).isoformat()
         valid, reason = cache.check_and_consume(nonce, future_ts)
         assert not valid
 
@@ -77,11 +74,12 @@ class TestNonceCache:
         nonce = generate_nonce()
         cache.check_and_consume(nonce, current_timestamp())
         # Manually expire it by manipulating the DB
+        from datetime import datetime, timedelta
+
         from backend.app.models import UsedNonce
-        from datetime import datetime, timezone, timedelta
         record = db.query(UsedNonce).filter(UsedNonce.nonce == nonce).first()
         if record:
-            record.expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+            record.expires_at = datetime.now(UTC) - timedelta(seconds=1)
             db.commit()
         deleted = cache.purge_expired()
         assert deleted >= 1

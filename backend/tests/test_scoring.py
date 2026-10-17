@@ -3,9 +3,7 @@ Tests for the risk scoring engine.
 """
 from __future__ import annotations
 
-import pytest
-
-from backend.app.scoring import RiskInput, compute_risk_score, WEIGHTS
+from backend.app.scoring import WEIGHTS, RiskInput, compute_risk_score
 
 
 class TestRiskScoring:

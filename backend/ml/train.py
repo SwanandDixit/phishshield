@@ -30,7 +30,7 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import train_test_split
 
-from backend.ml.features import EngineeredFeatureTransformer, build_full_pipeline
+from backend.ml.features import build_full_pipeline
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -208,8 +208,8 @@ def print_training_report(metrics: dict[str, Any], elapsed: float) -> None:
     print(f"  Recall       : {metrics['recall']:.4f}")
     print(f"  F1 Score     : {metrics['f1']:.4f}")
     print(f"  ROC-AUC      : {metrics['roc_auc']:.4f}")
-    print(f"\n  Confusion Matrix (rows=actual, cols=predicted):")
-    print(f"               Predicted-Legit  Predicted-Phish")
+    print("\n  Confusion Matrix (rows=actual, cols=predicted):")
+    print("               Predicted-Legit  Predicted-Phish")
     print(f"  Actual-Legit      {tn:>7}          {fp:>7}")
     print(f"  Actual-Phish      {fn:>7}          {tp:>7}")
     print(bar)

@@ -19,9 +19,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 from cryptography.hazmat.primitives.asymmetric.rsa import (
     RSAPrivateKey,
     RSAPublicKey,
-    generate_private_key,
 )
-
 
 # ─── Ed25519 ──────────────────────────────────────────────────────────────────
 

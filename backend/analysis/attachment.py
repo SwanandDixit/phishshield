@@ -15,16 +15,15 @@ import hashlib
 import logging
 import mimetypes
 import os
-import re
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Set, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Dangerous extension set (100+ entries)
 # ---------------------------------------------------------------------------
-_DANGEROUS_EXTENSIONS: Set[str] = {
+_DANGEROUS_EXTENSIONS: set[str] = {
     # Executables
     ".exe", ".com", ".scr", ".pif", ".application", ".gadget",
     ".msi", ".msp", ".mst", ".msu",
@@ -126,14 +125,14 @@ _DANGEROUS_EXTENSIONS: Set[str] = {
 # ---------------------------------------------------------------------------
 # Extensions / MIME types for Office files that may contain macros
 # ---------------------------------------------------------------------------
-_MACRO_OFFICE_EXTENSIONS: Set[str] = {
+_MACRO_OFFICE_EXTENSIONS: set[str] = {
     ".doc", ".dot", ".xls", ".xlt", ".xlb", ".ppt", ".pot",
     ".docm", ".dotm", ".xlsm", ".xltm", ".xlam", ".pptm", ".potm",
     ".ppsm", ".sldm", ".accde", ".accdb", ".accda", ".accdt",
     ".pub", ".xla", ".ppa", ".ppam", ".wbk", ".xll",
 }
 
-_MACRO_OFFICE_MIMES: Set[str] = {
+_MACRO_OFFICE_MIMES: set[str] = {
     "application/msword",
     "application/vnd.ms-word",
     "application/vnd.ms-excel",
@@ -194,11 +193,11 @@ class AttachmentAnalysis:
     double_extension_pattern: str = ""
     is_macro_office: bool = False
     macro_reason: str = ""
-    vt_detection_count: Optional[int] = None
-    vt_total_engines: Optional[int] = None
+    vt_detection_count: int | None = None
+    vt_total_engines: int | None = None
     vt_permalink: str = ""
     risk_score: int = 0
-    risk_factors: List[str] = field(default_factory=list)
+    risk_factors: list[str] = field(default_factory=list)
 
     @property
     def virustotal_detections(self) -> int:
@@ -209,7 +208,7 @@ class AttachmentAnalysis:
 # Individual check functions
 # ---------------------------------------------------------------------------
 
-def check_dangerous_extension(filename: str) -> Tuple[bool, str]:
+def check_dangerous_extension(filename: str) -> tuple[bool, str]:
     """Determine whether *filename* carries a known-dangerous extension.
 
     The comparison is case-insensitive.
@@ -238,7 +237,7 @@ def check_dangerous_extension(filename: str) -> Tuple[bool, str]:
     return False, ""
 
 
-def check_double_extension(filename: str) -> Tuple[bool, str]:
+def check_double_extension(filename: str) -> tuple[bool, str]:
     """Detect double-extension spoofing patterns in *filename*.
 
     A double extension attack disguises an executable as a harmless file
@@ -292,7 +291,7 @@ def check_double_extension(filename: str) -> Tuple[bool, str]:
     return False, ""
 
 
-def check_macro_office(filename: str, mime_type: str = "") -> Tuple[bool, str]:
+def check_macro_office(filename: str, mime_type: str = "") -> tuple[bool, str]:
     """Determine whether *filename* represents an Office document that may
     contain executable macros.
 
@@ -355,7 +354,7 @@ def compute_hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def virustotal_lookup(sha256_hash: str) -> Tuple[Optional[int], Optional[int], str]:
+def virustotal_lookup(sha256_hash: str) -> tuple[int | None, int | None, str]:
     """Look up a file hash against the VirusTotal API v3.
 
     Only performs the lookup if the ``VT_API_KEY`` environment variable is
@@ -446,9 +445,9 @@ def _compute_risk_score(
     is_dangerous_ext: bool,
     is_double_ext: bool,
     is_macro: bool,
-    vt_count: Optional[int],
-    vt_total: Optional[int],
-) -> Tuple[int, List[str]]:
+    vt_count: int | None,
+    vt_total: int | None,
+) -> tuple[int, list[str]]:
     """Calculate a 0–100 risk score from individual indicators.
 
     Scoring weights:
@@ -469,7 +468,7 @@ def _compute_risk_score(
         *factors* is a list of human-readable descriptions.
     """
     score = 0
-    factors: List[str] = []
+    factors: list[str] = []
 
     if is_dangerous_ext:
         score += 35

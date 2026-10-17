@@ -13,9 +13,8 @@ from __future__ import annotations
 import ipaddress
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime
 from typing import Any
-
 
 # ---------------------------------------------------------------------------
 # Regex patterns
@@ -305,9 +304,9 @@ def analyze_date_header(
 
     # Ensure timezone-aware for comparison.
     if parsed_dt.tzinfo is None:
-        parsed_dt = parsed_dt.replace(tzinfo=timezone.utc)
+        parsed_dt = parsed_dt.replace(tzinfo=UTC)
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     delta = parsed_dt - now
     offset_hours = delta.total_seconds() / 3600.0
 
@@ -379,7 +378,7 @@ def _compute_header_score(
     if private_in_public:
         score += 15.0
         risk_factors.append(
-            f"Private/reserved IP(s) at non-final Received hop(s): "
+            "Private/reserved IP(s) at non-final Received hop(s): "
             + ", ".join(private_in_public)
         )
 

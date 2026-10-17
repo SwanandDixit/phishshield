@@ -14,8 +14,7 @@ This prevents an attacker from capturing and replaying valid signed messages.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy.orm import Session
 
@@ -35,7 +34,7 @@ def generate_nonce() -> str:
 
 def current_timestamp() -> str:
     """Return the current UTC time as ISO-8601 string."""
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 # ─── Nonce Cache (database-backed, persistent across restarts) ────────────────
@@ -50,7 +49,7 @@ class NonceCache:
     an in-memory cache.
     """
 
-    def __init__(self, db: Session, window_seconds: Optional[int] = None):
+    def __init__(self, db: Session, window_seconds: int | None = None):
         self.db = db
         self.window = window_seconds or settings.replay_timestamp_window_seconds
 
@@ -58,7 +57,7 @@ class NonceCache:
         self,
         nonce: str,
         message_timestamp: str,
-        message_id: Optional[str] = None,
+        message_id: str | None = None,
     ) -> tuple[bool, str]:
         """
         Validate a nonce+timestamp pair and mark it consumed.
@@ -76,11 +75,11 @@ class NonceCache:
         try:
             msg_time = datetime.fromisoformat(message_timestamp.replace("Z", "+00:00"))
             if msg_time.tzinfo is None:
-                msg_time = msg_time.replace(tzinfo=timezone.utc)
+                msg_time = msg_time.replace(tzinfo=UTC)
         except ValueError:
             return False, f"Invalid timestamp format: {message_timestamp!r}"
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         delta = abs((now - msg_time).total_seconds())
         if delta > self.window:
             return False, (
@@ -103,7 +102,7 @@ class NonceCache:
 
     def purge_expired(self) -> int:
         """Remove expired nonce entries.  Call periodically to keep the table small."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         deleted = self.db.query(UsedNonce).filter(UsedNonce.expires_at < now).delete()
         self.db.commit()
         return deleted

@@ -4,8 +4,6 @@ Tests for the email analysis pipeline (end-to-end integration tests).
 from __future__ import annotations
 
 import base64
-import os
-import pytest
 
 # conftest sets up env + DB
 

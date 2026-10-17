@@ -25,9 +25,10 @@ import email.policy
 import hashlib
 import logging
 import os
-import re
-from dataclasses import dataclass, field
-from typing import Dict, Optional, Tuple
+from dataclasses import dataclass
+
+import dns.exception
+import dns.resolver
 
 logger = logging.getLogger(__name__)
 
@@ -48,23 +49,18 @@ except ImportError:
 # Optional dependency: cryptography (used in fallback path)
 # ---------------------------------------------------------------------------
 try:
-    from cryptography.hazmat.primitives import hashes, serialization
-    from cryptography.hazmat.primitives.asymmetric import padding
-    from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
+    from cryptography.hazmat.primitives import serialization
 
     _CRYPTOGRAPHY_AVAILABLE = True
 except ImportError:
     _CRYPTOGRAPHY_AVAILABLE = False
-
-import dns.exception
-import dns.resolver
 
 # ---------------------------------------------------------------------------
 # Test-mode key store
 # ---------------------------------------------------------------------------
 # Maps "selector._domainkey.domain" → raw base64-encoded RSA public key (p= value)
 # In test mode the keys are synthetic and only used to validate the path logic.
-_TEST_KEY_MAP: Dict[str, str] = {
+_TEST_KEY_MAP: dict[str, str] = {
     "test-selector._domainkey.pass.example.com": (
         # 512-bit RSA public key (test only — not production strength)
         "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMqBuSSb3nMFmX7fV3Qd1D2G"
@@ -111,7 +107,7 @@ def _is_test_mode() -> bool:
     return os.environ.get("AUTH_DNS_MODE", "").strip().lower() == "test"
 
 
-def _parse_dkim_header(raw_email_bytes: bytes) -> Optional[Dict[str, str]]:
+def _parse_dkim_header(raw_email_bytes: bytes) -> dict[str, str] | None:
     """Extract and parse the first DKIM-Signature header from *raw_email_bytes*.
 
     Args:
@@ -133,7 +129,7 @@ def _parse_dkim_header(raw_email_bytes: bytes) -> Optional[Dict[str, str]]:
     if sig_header is None:
         return None
 
-    tags: Dict[str, str] = {}
+    tags: dict[str, str] = {}
     # DKIM-Signature value is a semicolon-separated list of tag=value pairs
     for part in sig_header.split(";"):
         part = part.strip()
@@ -143,7 +139,7 @@ def _parse_dkim_header(raw_email_bytes: bytes) -> Optional[Dict[str, str]]:
     return tags
 
 
-def _fetch_dkim_key(selector: str, domain: str) -> Optional[str]:
+def _fetch_dkim_key(selector: str, domain: str) -> str | None:
     """Retrieve the DKIM public key ``p=`` value from DNS (or test store).
 
     The key is located at ``{selector}._domainkey.{domain}`` as a TXT record
@@ -182,8 +178,8 @@ def _fetch_dkim_key(selector: str, domain: str) -> Optional[str]:
 
 
 def _fallback_verify(
-    raw_email_bytes: bytes, tags: Dict[str, str]
-) -> Tuple[bool, str]:
+    raw_email_bytes: bytes, tags: dict[str, str]
+) -> tuple[bool, str]:
     """Attempt a basic RSA signature check without dkimpy.
 
     This is a best-effort fallback. It validates the signature bytes against
@@ -232,21 +228,17 @@ def _fallback_verify(
     # Decode the public key
     try:
         key_der = base64.b64decode(public_key_b64)
-        public_key = serialization.load_der_public_key(key_der)  # type: ignore[arg-type]
+        serialization.load_der_public_key(key_der)  # type: ignore[arg-type]
     except Exception as exc:
         return False, f"Failed to decode DKIM public key: {exc}"
 
     # Determine hash algorithm
-    if "sha256" in algorithm:
-        hash_algo = hashes.SHA256()
-    elif "sha1" in algorithm:
-        hash_algo = hashes.SHA1()  # noqa: S303 — DKIM legacy
-    else:
+    if "sha256" not in algorithm and "sha1" not in algorithm:
         return False, f"Unsupported DKIM algorithm: {algorithm}"
 
     # Decode the signature
     try:
-        sig_bytes = base64.b64decode(b_value.replace(" ", "").replace("\t", ""))
+        base64.b64decode(b_value.replace(" ", "").replace("\t", ""))
     except Exception as exc:
         return False, f"Failed to base64-decode DKIM signature: {exc}"
 

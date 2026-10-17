@@ -17,9 +17,8 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from dataclasses import dataclass, field
-from typing import Any, Iterable
-
+from dataclasses import dataclass
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Reference data

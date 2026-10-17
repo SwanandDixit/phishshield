@@ -5,7 +5,7 @@ Returns aggregated statistics for the dashboard UI.
 from __future__ import annotations
 
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
 from backend.app.deps import get_current_user
-from backend.app.models import EmailRecord, SecurityLog, User, Verdict
+from backend.app.models import EmailRecord, User, Verdict
 from backend.app.schemas import DashboardStats
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
@@ -33,7 +33,7 @@ async def get_stats(
 
     avg_score = db.query(func.avg(EmailRecord.risk_score)).scalar() or 0.0
 
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     detections_today = (
         db.query(func.count(EmailRecord.id))
         .filter(
@@ -138,7 +138,7 @@ async def get_timeline(
     _user: User = Depends(get_current_user),
 ):
     """Return verdict counts per day for the last N days."""
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    since = datetime.now(UTC) - timedelta(days=days)
     records = (
         db.query(EmailRecord)
         .filter(EmailRecord.received_at >= since)

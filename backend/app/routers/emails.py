@@ -8,19 +8,18 @@ import base64
 import csv
 import io
 import json
-from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
+from backend.app.config import get_settings
 from backend.app.database import get_db
 from backend.app.deps import get_current_user, require_admin
 from backend.app.models import EmailRecord, User, Verdict
 from backend.app.pipeline import process_email
 from backend.app.schemas import EmailAnalysisRequest, EmailDetail, EmailSummary
 from backend.crypto.aes import decrypt_email
-from backend.app.config import get_settings
 
 settings = get_settings()
 router = APIRouter(prefix="/emails", tags=["emails"])
@@ -28,12 +27,12 @@ router = APIRouter(prefix="/emails", tags=["emails"])
 
 @router.get("/", response_model=list[EmailSummary])
 async def list_emails(
-    verdict: Optional[str] = Query(None),
-    search: Optional[str] = Query(None),
+    verdict: str | None = Query(None),
+    search: str | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    quarantine: Optional[bool] = Query(None),
-    is_simulation: Optional[bool] = Query(None),
+    quarantine: bool | None = Query(None),
+    is_simulation: bool | None = Query(None),
     db: Session = Depends(get_db),
     _user: User = Depends(get_current_user),
 ):

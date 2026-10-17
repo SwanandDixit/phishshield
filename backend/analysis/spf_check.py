@@ -16,8 +16,7 @@ import ipaddress
 import logging
 import os
 import re
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 import dns.exception
 import dns.rdatatype
@@ -28,7 +27,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Test-mode fake DNS data
 # ---------------------------------------------------------------------------
-_TEST_DNS_MAP: Dict[str, List[str]] = {
+_TEST_DNS_MAP: dict[str, list[str]] = {
     "test-pass.example.com": [
         "v=spf1 ip4:203.0.113.1 ip4:203.0.113.0/24 -all"
     ],
@@ -85,7 +84,7 @@ def _is_test_mode() -> bool:
     return os.environ.get("AUTH_DNS_MODE", "").strip().lower() == "test"
 
 
-def _fetch_txt_records(domain: str) -> List[str]:
+def _fetch_txt_records(domain: str) -> list[str]:
     """Retrieve TXT records for *domain*, honouring test mode.
 
     Args:
@@ -102,7 +101,7 @@ def _fetch_txt_records(domain: str) -> List[str]:
     if _is_test_mode():
         return _TEST_DNS_MAP.get(domain, [])
 
-    answers: List[str] = []
+    answers: list[str] = []
     try:
         response = dns.resolver.resolve(domain, "TXT")
         for rdata in response:
@@ -120,7 +119,7 @@ def _fetch_txt_records(domain: str) -> List[str]:
     return answers
 
 
-def _fetch_spf_record(domain: str) -> Optional[str]:
+def _fetch_spf_record(domain: str) -> str | None:
     """Return the first TXT record that begins with 'v=spf1' for *domain*.
 
     Args:
@@ -140,7 +139,7 @@ def _fetch_spf_record(domain: str) -> Optional[str]:
     return None
 
 
-def _resolve_a_records(domain: str) -> List[str]:
+def _resolve_a_records(domain: str) -> list[str]:
     """Return IPv4 addresses from A records for *domain*.
 
     Args:
@@ -152,7 +151,7 @@ def _resolve_a_records(domain: str) -> List[str]:
     if _is_test_mode():
         return []
 
-    addresses: List[str] = []
+    addresses: list[str] = []
     try:
         response = dns.resolver.resolve(domain, "A")
         for rdata in response:
@@ -164,7 +163,7 @@ def _resolve_a_records(domain: str) -> List[str]:
     return addresses
 
 
-def _resolve_aaaa_records(domain: str) -> List[str]:
+def _resolve_aaaa_records(domain: str) -> list[str]:
     """Return IPv6 addresses from AAAA records for *domain*.
 
     Args:
@@ -176,7 +175,7 @@ def _resolve_aaaa_records(domain: str) -> List[str]:
     if _is_test_mode():
         return []
 
-    addresses: List[str] = []
+    addresses: list[str] = []
     try:
         response = dns.resolver.resolve(domain, "AAAA")
         for rdata in response:
@@ -188,7 +187,7 @@ def _resolve_aaaa_records(domain: str) -> List[str]:
     return addresses
 
 
-def _resolve_mx_records(domain: str) -> List[str]:
+def _resolve_mx_records(domain: str) -> list[str]:
     """Return the hostnames pointed to by MX records for *domain*.
 
     Args:
@@ -200,7 +199,7 @@ def _resolve_mx_records(domain: str) -> List[str]:
     if _is_test_mode():
         return []
 
-    hostnames: List[str] = []
+    hostnames: list[str] = []
     try:
         response = dns.resolver.resolve(domain, "MX")
         for rdata in response:
@@ -238,7 +237,7 @@ def _evaluate_spf(
     record: str,
     sending_ip: str,
     sender_domain: str,
-    lookup_count: List[int],
+    lookup_count: list[int],
 ) -> str:
     """Recursively evaluate an SPF *record* against *sending_ip*.
 
@@ -431,8 +430,8 @@ def _parse_domain_spec(spec: str, default_domain: str):
         return default_domain, None, None
 
     domain = default_domain
-    prefix4: Optional[str] = None
-    prefix6: Optional[str] = None
+    prefix4: str | None = None
+    prefix6: str | None = None
 
     # Strip leading colon
     if spec.startswith(":"):
@@ -507,7 +506,7 @@ def check_spf(sending_ip: str, sender_email: str) -> SPFResult:
         )
 
     raw_record = spf_record
-    lookup_count: List[int] = [0]
+    lookup_count: list[int] = [0]
 
     try:
         verdict = _evaluate_spf(spf_record, sending_ip, domain, lookup_count)
@@ -521,7 +520,7 @@ def check_spf(sending_ip: str, sender_email: str) -> SPFResult:
             domain=domain,
         )
 
-    explanations: Dict[str, str] = {
+    explanations: dict[str, str] = {
         "pass": (
             f"The sending IP {sending_ip} is authorized to send mail for {domain}."
         ),

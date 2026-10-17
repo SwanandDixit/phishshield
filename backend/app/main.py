@@ -9,24 +9,22 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-import secrets
-import string
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import uvicorn
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from backend.app.config import get_settings
-from backend.app.database import init_db, SessionLocal
+from backend.app.database import SessionLocal, init_db
 from backend.app.deps import hash_password
 from backend.app.models import User, UserRole
-from backend.app.routers import auth, dashboard, emails, keys, logs, model, settings as settings_router, simulation
+from backend.app.routers import auth, dashboard, emails, keys, logs, model, simulation
+from backend.app.routers import settings as settings_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -78,7 +76,7 @@ def _seed_admin() -> None:
                 hashed_password=hash_password(app_settings.admin_password),
                 role=UserRole.ADMIN,
                 is_active=True,
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(UTC),
             )
             db.add(admin)
             db.commit()

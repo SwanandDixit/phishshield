@@ -10,7 +10,6 @@ import base64
 import hashlib
 import hmac
 import os
-from typing import Optional
 
 
 def hmac_sign(message: bytes, secret_key: bytes) -> bytes:
@@ -61,7 +60,7 @@ def generate_hmac_key_b64(length: int = 32) -> str:
 
 def pbkdf2_derive(
     password: bytes,
-    salt: Optional[bytes] = None,
+    salt: bytes | None = None,
     iterations: int = 600_000,  # NIST 2023 recommendation for SHA-256
     length: int = 32,
 ) -> tuple[bytes, bytes]:

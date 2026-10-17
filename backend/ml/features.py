@@ -20,7 +20,6 @@ from urllib.parse import urlparse
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.sparse import hstack, issparse
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import FeatureUnion, Pipeline
@@ -361,7 +360,7 @@ class TextSelector(BaseEstimator, TransformerMixin):
     def __init__(self, key: str = "text") -> None:
         self.key = key
 
-    def fit(self, X: Any, y: Any = None) -> "TextSelector":  # noqa: N803
+    def fit(self, X: Any, y: Any = None) -> TextSelector:  # noqa: N803
         return self
 
     def transform(self, X: Any) -> list[str]:  # noqa: N803
@@ -403,7 +402,7 @@ class EngineeredFeatureTransformer(BaseEstimator, TransformerMixin):
         "link_count", "image_count", "attachment_count",
     ]
 
-    def fit(self, X: Any, y: Any = None) -> "EngineeredFeatureTransformer":  # noqa: N803
+    def fit(self, X: Any, y: Any = None) -> EngineeredFeatureTransformer:  # noqa: N803
         return self
 
     def transform(self, X: Any) -> NDArray[np.float64]:  # noqa: N803
@@ -468,7 +467,7 @@ class RawTextTransformer(BaseEstimator, TransformerMixin):
     strings it passes them through unchanged.
     """
 
-    def fit(self, X: Any, y: Any = None) -> "RawTextTransformer":  # noqa: N803
+    def fit(self, X: Any, y: Any = None) -> RawTextTransformer:  # noqa: N803
         return self
 
     def transform(self, X: Any) -> list[str]:  # noqa: N803

@@ -5,8 +5,6 @@ and produces expected detection outcomes.
 """
 from __future__ import annotations
 
-import base64
-import os
 import pytest
 
 # conftest sets AUTH_DNS_MODE=test
@@ -79,11 +77,14 @@ class TestSimulationScenarios:
 
     async def test_all_scenarios_produce_email_records(self, db):
         """Ensure all 5 scenarios create real DB records."""
-        from backend.simulation.scenarios import (
-            scenario_phishing, scenario_spoofing,
-            scenario_tampering, scenario_replay, scenario_mitm,
-        )
         from backend.app.models import EmailRecord
+        from backend.simulation.scenarios import (
+            scenario_mitm,
+            scenario_phishing,
+            scenario_replay,
+            scenario_spoofing,
+            scenario_tampering,
+        )
         initial_count = db.query(EmailRecord).count()
 
         await scenario_phishing(db, 99)

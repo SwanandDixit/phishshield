@@ -19,6 +19,8 @@ os.environ.setdefault("ADMIN_PASSWORD", "TestPassword123!")
 os.environ.setdefault("AUTH_DNS_MODE", "test")  # Use fake DNS in all tests
 os.environ.setdefault("DISABLE_SMTP", "1")       # Skip SMTP server in tests
 
+from datetime import UTC
+
 from backend.app.database import Base, get_db  # noqa: E402
 from backend.app.main import app  # noqa: E402
 
@@ -41,8 +43,10 @@ app.dependency_overrides[get_db] = override_get_db
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
     """Create test tables once per session and seed admin."""
-    from datetime import datetime, timezone
+    from datetime import datetime
+
     from sqlalchemy.exc import IntegrityError
+
     from backend.app import models  # noqa: F401
     from backend.app.deps import hash_password
     Base.metadata.create_all(bind=test_engine)
@@ -58,7 +62,7 @@ def setup_test_db():
                 hashed_password=hash_password("TestPassword123!"),
                 role=models.UserRole.ADMIN,
                 is_active=True,
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(UTC),
             )
             session.add(admin)
             session.commit()

@@ -5,7 +5,6 @@ All tables are defined here so that init_db() can create them.
 from __future__ import annotations
 
 import enum
-from datetime import datetime
 
 from sqlalchemy import (
     JSON,
@@ -24,7 +23,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from backend.app.database import Base
-
 
 # ─── Enums ───────────────────────────────────────────────────────────────────
 

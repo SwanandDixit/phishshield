@@ -7,8 +7,6 @@ Applies hard overrides for critical security failures.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
-
 
 # ─── Factor Weights ───────────────────────────────────────────────────────────
 # Must sum to 100
@@ -47,10 +45,10 @@ class RiskInput:
 
     # Crypto
     signature_claimed: bool = False    # email claims to be signed
-    signature_valid: Optional[bool] = None
+    signature_valid: bool | None = None
     hmac_claimed: bool = False
-    hmac_valid: Optional[bool] = None
-    hash_match: Optional[bool] = None
+    hmac_valid: bool | None = None
+    hash_match: bool | None = None
     replay_detected: bool = False
 
     # Known-malicious attachment hash
@@ -68,7 +66,7 @@ class RiskOutput:
     header_score: float
     crypto_score: float
     hard_override: bool
-    override_reason: Optional[str]
+    override_reason: str | None
     verdict: str          # 'LEGITIMATE', 'SUSPICIOUS', 'MALICIOUS'
     explanation: dict
 
@@ -157,7 +155,7 @@ def compute_risk_score(inp: RiskInput, thresholds: dict | None = None) -> RiskOu
 
     # ── Hard overrides ─────────────────────────────────────────────────────────
     override = False
-    override_reason: Optional[str] = None
+    override_reason: str | None = None
 
     if inp.signature_claimed and inp.signature_valid is False:
         total = 100.0

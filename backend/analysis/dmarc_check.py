@@ -15,8 +15,7 @@ References:
 import logging
 import os
 import re
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from dataclasses import dataclass
 
 import dns.exception
 import dns.resolver
@@ -26,7 +25,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Test-mode fake DNS data
 # ---------------------------------------------------------------------------
-_TEST_DMARC_MAP: Dict[str, str] = {
+_TEST_DMARC_MAP: dict[str, str] = {
     "_dmarc.pass.example.com": (
         "v=DMARC1; p=reject; sp=quarantine; aspf=r; adkim=r; pct=100"
     ),
@@ -41,6 +40,13 @@ _TEST_DMARC_MAP: Dict[str, str] = {
     ),
     # Intentionally absent — used to test 'none' result
     # "_dmarc.nodmarc.example.com": ...
+}
+
+# Known multi-part TLDs (non-exhaustive but covers common cases)
+_MULTI_TLDS: set[str] = {
+    "co.uk", "com.au", "com.br", "co.nz", "co.in", "org.uk",
+    "net.au", "gov.au", "gov.uk", "ac.uk", "me.uk", "ltd.uk",
+    "plc.uk", "net.uk",
 }
 
 
@@ -92,7 +98,7 @@ def _is_test_mode() -> bool:
     return os.environ.get("AUTH_DNS_MODE", "").strip().lower() == "test"
 
 
-def _fetch_dmarc_record(domain: str) -> Optional[str]:
+def _fetch_dmarc_record(domain: str) -> str | None:
     """Fetch the DMARC TXT record from ``_dmarc.{domain}``.
 
     Args:
@@ -122,7 +128,7 @@ def _fetch_dmarc_record(domain: str) -> Optional[str]:
     return None
 
 
-def _parse_dmarc_record(record: str) -> Dict[str, str]:
+def _parse_dmarc_record(record: str) -> dict[str, str]:
     """Parse a DMARC TXT record string into a tag→value dictionary.
 
     Tags are case-insensitive per RFC 7489 §6.3.  Values are returned
@@ -134,7 +140,7 @@ def _parse_dmarc_record(record: str) -> Dict[str, str]:
     Returns:
         Dictionary mapping lowercase tag names to their string values.
     """
-    tags: Dict[str, str] = {}
+    tags: dict[str, str] = {}
     for part in record.split(";"):
         part = part.strip()
         if "=" in part:
@@ -156,12 +162,6 @@ def _extract_org_domain(domain: str) -> str:
     Returns:
         The organisational domain (e.g. 'mail.example.co.uk' → 'example.co.uk').
     """
-    # Known multi-part TLDs (non-exhaustive but covers common cases)
-    _MULTI_TLDS = {
-        "co.uk", "com.au", "com.br", "co.nz", "co.in", "org.uk",
-        "net.au", "gov.au", "gov.uk", "ac.uk", "me.uk", "ltd.uk",
-        "plc.uk", "net.uk",
-    }
     parts = domain.lower().split(".")
     if len(parts) <= 2:
         return domain.lower()
@@ -344,7 +344,7 @@ def check_dmarc(
         )
     else:
         result = "fail"
-        reasons: List[str] = []
+        reasons: list[str] = []
         if not spf_pass:
             reasons.append(f"SPF result was '{spf_result}' (not 'pass')")
         elif not spf_aligned:

@@ -5,7 +5,7 @@ Manage Ed25519 / RSA-PSS / HMAC keys for partner gateways and signing.
 from __future__ import annotations
 
 import base64
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -89,7 +89,7 @@ async def revoke_key(
     if not key:
         raise HTTPException(status_code=404, detail="Key not found")
     key.is_active = False
-    key.revoked_at = datetime.now(timezone.utc)
+    key.revoked_at = datetime.now(UTC)
     db.commit()
     return {"status": "revoked", "key_id": key_id}
 

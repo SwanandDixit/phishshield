@@ -5,7 +5,7 @@ GET  /auth/me     – returns current user info
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -43,7 +43,7 @@ async def login(request: Request, body: LoginRequest, db: Session = Depends(get_
         )
 
     # Update last login
-    user.last_login = datetime.now(timezone.utc)
+    user.last_login = datetime.now(UTC)
     db.commit()
 
     token = create_access_token({"sub": user.email, "role": user.role.value})
