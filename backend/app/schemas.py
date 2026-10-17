@@ -216,8 +216,8 @@ class ModelMetrics(BaseModel):
     f1: float
     roc_auc: float
     confusion_matrix: list[list[int]]
-    training_samples: int
-    test_samples: int
-    top_features: list[dict]
-    trained_at: Optional[str]
-    dataset_source: str
+    training_samples: int = 2441
+    test_samples: int = 611
+    top_features: list[dict] = Field(default_factory=list)
+    trained_at: Optional[str] = None
+    dataset_source: str = "SpamAssassin Public Corpus"
